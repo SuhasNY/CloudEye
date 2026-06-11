@@ -13,8 +13,13 @@ resource "aws_instance" "test" {
     aws_security_group.cloudeye_sg.id
   ]
 
-  user_data = file("${path.module}/userdata/prometheus.sh")
-
+user_data = templatefile(
+  "${path.module}/userdata/prometheus.sh.tmpl",
+  {
+    node_exporter_ip = aws_instance.node_exporter.private_ip
+    alertmanager_ip  = aws_instance.alertmanager.private_ip
+  }
+)
   user_data_replace_on_change = true
 
   tags = {

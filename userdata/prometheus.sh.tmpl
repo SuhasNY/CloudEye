@@ -38,7 +38,7 @@ alerting:
   alertmanagers:
     - static_configs:
         - targets:
-            - '172.31.9.250:9093'
+            - '${alertmanager_ip}:9093'
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -49,7 +49,8 @@ scrape_configs:
   - job_name: 'node_exporter'
 
     static_configs:
-      - targets: ['172.31.1.189:9100']
+      - targets:
+          - '${node_exporter_ip}:9100'
 
 EOF
 
