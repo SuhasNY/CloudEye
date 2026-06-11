@@ -82,8 +82,14 @@ resource "aws_instance" "alertmanager" {
     aws_security_group.cloudeye_sg.id
   ]
 
-  user_data = file("${path.module}/userdata/alertmanager.sh")
-
+user_data = templatefile(
+  "${path.module}/userdata/alertmanager.sh.tmpl",
+  {
+    gmail_user     = var.gmail_user
+    gmail_password = var.gmail_password
+    alert_email    = var.alert_email
+  }
+)
   user_data_replace_on_change = true
 
   tags = {
