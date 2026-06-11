@@ -38,6 +38,8 @@ module "node_exporter" {
   ami           = var.ami_id
   instance_type = var.instance_type
 
+  instance_profile = module.iam.instance_profile_name
+
   key_name = "CloudEye-key-pair"
 
   security_group_ids = [

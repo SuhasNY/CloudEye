@@ -23,7 +23,14 @@ cp prometheus-3.5.0.linux-amd64/prometheus /usr/local/bin/
 cp prometheus-3.5.0.linux-amd64/promtool /usr/local/bin/
 
 # Install AWS CLI
-apt install -y awscli
+apt install -y unzip curl
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  -o "awscliv2.zip"
+
+unzip awscliv2.zip
+
+./aws/install
 
 # Download configs from S3
 aws s3 cp \
