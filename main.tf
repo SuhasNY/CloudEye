@@ -53,8 +53,12 @@ resource "aws_instance" "grafana" {
     aws_security_group.cloudeye_sg.id
   ]
 
-  user_data = file("${path.module}/userdata/grafana.sh")
-
+user_data = templatefile(
+  "${path.module}/userdata/grafana.sh.tmpl",
+  {
+    prometheus_ip = aws_instance.test.private_ip
+  }
+)
   user_data_replace_on_change = true
 
   tags = {
