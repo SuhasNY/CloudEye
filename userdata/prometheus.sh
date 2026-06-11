@@ -31,6 +31,15 @@ cat > /etc/prometheus/prometheus.yml <<EOF
 global:
   scrape_interval: 15s
 
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - '172.31.9.250:9093'
+
 scrape_configs:
   - job_name: 'prometheus'
 
@@ -41,6 +50,24 @@ scrape_configs:
 
     static_configs:
       - targets: ['172.31.1.189:9100']
+
+EOF
+
+cat > /etc/prometheus/alerts.yml <<EOF
+groups:
+  - name: cloudeye-alerts
+
+    rules:
+      - alert: NodeExporterDown
+        expr: up{job="node_exporter"} == 0
+        for: 1m
+
+        labels:
+          severity: critical
+
+        annotations:
+          summary: "Node Exporter is down"
+          description: "Prometheus cannot reach Node Exporter"
 EOF
 
 # Create systemd service
