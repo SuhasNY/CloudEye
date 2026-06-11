@@ -22,54 +22,21 @@ mkdir -p /var/lib/prometheus
 cp prometheus-3.5.0.linux-amd64/prometheus /usr/local/bin/
 cp prometheus-3.5.0.linux-amd64/promtool /usr/local/bin/
 
+# Install AWS CLI
+apt install -y awscli
+
+# Download configs from S3
+aws s3 cp \
+  s3://${bucket_name}/prometheus/prometheus.yml \
+  /etc/prometheus/prometheus.yml
+
+aws s3 cp \
+  s3://${bucket_name}/prometheus/alerts.yml \
+  /etc/prometheus/alerts.yml
+
 # Set permissions
 chown -R prometheus:prometheus /etc/prometheus
 chown -R prometheus:prometheus /var/lib/prometheus
-
-# Create Prometheus configuration
-cat > /etc/prometheus/prometheus.yml <<EOF
-global:
-  scrape_interval: 15s
-
-rule_files:
-  - "alerts.yml"
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-            - '${alertmanager_ip}:9093'
-
-scrape_configs:
-  - job_name: 'prometheus'
-
-    static_configs:
-      - targets: ['localhost:9090']
-
-  - job_name: 'node_exporter'
-
-    static_configs:
-      - targets:
-          - '${node_exporter_ip}:9100'
-
-EOF
-
-cat > /etc/prometheus/alerts.yml <<EOF
-groups:
-  - name: cloudeye-alerts
-
-    rules:
-      - alert: NodeExporterDown
-        expr: up{job="node_exporter"} == 0
-        for: 1m
-
-        labels:
-          severity: critical
-
-        annotations:
-          summary: "Node Exporter is down"
-          description: "Prometheus cannot reach Node Exporter"
-EOF
 
 # Create systemd service
 cat > /etc/systemd/system/prometheus.service <<EOF

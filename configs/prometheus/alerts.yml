@@ -1,0 +1,14 @@
+groups:
+  - name: cloudeye-alerts
+
+    rules:
+      - alert: NodeExporterDown
+        expr: up{job="node_exporter"} == 0
+        for: 1m
+
+        labels:
+          severity: critical
+
+        annotations:
+          summary: "Node Exporter is down"
+          description: "Prometheus cannot reach Node Exporter"

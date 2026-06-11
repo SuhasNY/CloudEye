@@ -16,25 +16,11 @@ mkdir -p /var/lib/alertmanager
 cp alertmanager-0.28.1.linux-amd64/alertmanager /usr/local/bin/
 cp alertmanager-0.28.1.linux-amd64/amtool /usr/local/bin/
 
-cat > /etc/alertmanager/alertmanager.yml <<EOF
-global:
-  resolve_timeout: 5m
+apt install -y awscli
 
-route:
-  receiver: 'email'
-
-receivers:
-  - name: 'email'
-
-    email_configs:
-      - to: '${alert_email}'
-        from: '${gmail_user}'
-        smarthost: 'smtp.gmail.com:587'
-
-        auth_username: '${gmail_user}'
-        auth_identity: '${gmail_user}'
-        auth_password: '${gmail_password}'
-EOF
+aws s3 cp \
+  s3://${bucket_name}/alertmanager/alertmanager.yml \
+  /etc/alertmanager/alertmanager.yml
 
 cat > /etc/systemd/system/alertmanager.service <<EOF
 [Unit]

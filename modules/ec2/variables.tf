@@ -21,3 +21,8 @@ variable "security_group_ids" {
 variable "user_data" {
   type = string
 }
+
+variable "instance_profile" {
+  type    = string
+  default = null
+}

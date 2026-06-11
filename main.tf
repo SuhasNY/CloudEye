@@ -11,6 +11,8 @@ module "prometheus" {
   ami           = var.ami_id
   instance_type = var.instance_type
 
+  instance_profile = module.iam.instance_profile_name
+
   key_name = "CloudEye-key-pair"
 
   security_group_ids = [
@@ -18,12 +20,13 @@ module "prometheus" {
   ]
 
   user_data = templatefile(
-    "${path.module}/userdata/prometheus.sh.tmpl",
-    {
+  "${path.module}/userdata/prometheus.sh.tmpl",
+  {
       node_exporter_ip = module.node_exporter.private_ip
       alertmanager_ip  = module.alertmanager.private_ip
-    }
-  )
+      bucket_name      = "cloudeye-monitoring-suhasny"
+  }
+ )
 }
 
 module "node_exporter" {
@@ -76,6 +79,8 @@ module "alertmanager" {
   ami           = var.ami_id
   instance_type = var.instance_type
 
+  instance_profile = module.iam.instance_profile_name
+
   key_name = "CloudEye-key-pair"
 
   security_group_ids = [
@@ -88,6 +93,7 @@ module "alertmanager" {
       gmail_user     = var.gmail_user
       gmail_password = var.gmail_password
       alert_email    = var.alert_email
+      bucket_name = "cloudeye-monitoring-suhasny"
     }
   )
 }
@@ -96,7 +102,7 @@ module "security_group" {
 
   source = "./modules/security_group"
 
-  name        = "cloudeye-sg"
+  name        = "CloudEye-SG"
   description = "Security group for CloudEye"
 
   ingress_rules = [
@@ -143,4 +149,13 @@ module "security_group" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
+}
+
+module "iam" {
+
+  source = "./modules/iam"
+
+  name = "CloudEye"
+
+  bucket_arn = aws_s3_bucket.cloudeye.arn
 }

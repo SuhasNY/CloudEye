@@ -1,0 +1,17 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'email'
+
+receivers:
+  - name: 'email'
+
+    email_configs:
+      - to: '${alert_email}'
+        from: '${gmail_user}'
+        smarthost: 'smtp.gmail.com:587'
+
+        auth_username: '${gmail_user}'
+        auth_identity: '${gmail_user}'
+        auth_password: '${gmail_password}'
