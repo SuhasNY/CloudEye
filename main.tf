@@ -22,6 +22,26 @@ resource "aws_instance" "test" {
   }
 }
 
+resource "aws_instance" "node_exporter" {
+
+  ami           = "ami-0f58b397bc5c1f2e8"
+  instance_type = "t3.micro"
+
+  key_name = "CloudEye-key-pair"
+
+  vpc_security_group_ids = [
+    aws_security_group.cloudeye_sg.id
+  ]
+
+  user_data = file("${path.module}/userdata/node_exporter.sh")
+
+  user_data_replace_on_change = true
+
+  tags = {
+    Name = "CloudEye-NodeExporter"
+  }
+}
+
 resource "aws_security_group" "cloudeye_sg" {
   name        = "cloudeye-sg"
   description = "Security group for CloudEye"
@@ -49,13 +69,22 @@ resource "aws_security_group" "cloudeye_sg" {
     }
 
   ingress {
-
     description = "Prometheus"
 
     from_port = 9090
     to_port   = 9090
 
     protocol = "tcp"
+
+    cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  ingress {
+    description = "Node Exporter"
+
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
 
     cidr_blocks = ["0.0.0.0/0"]
     }

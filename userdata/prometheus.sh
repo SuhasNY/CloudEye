@@ -33,8 +33,14 @@ global:
 
 scrape_configs:
   - job_name: 'prometheus'
+
     static_configs:
       - targets: ['localhost:9090']
+
+  - job_name: 'node_exporter'
+
+    static_configs:
+      - targets: ['172.31.1.189:9100']
 EOF
 
 # Create systemd service
