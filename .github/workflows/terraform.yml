@@ -1,0 +1,46 @@
+name: Terraform CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
+        env:
+          TF_VAR_gmail_user: ${{ secrets.TF_VAR_GMAIL_USER }}
+          TF_VAR_gmail_password: ${{ secrets.TF_VAR_GMAIL_PASSWORD }}
+          TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
+          TF_VAR_key_name: ${{ secrets.TF_VAR_KEY_NAME }}
+          TF_VAR_ami_id: ${{ secrets.TF_VAR_AMI_ID }}
+          TF_VAR_instance_type: ${{ secrets.TF_VAR_INSTANCE_TYPE }}
