@@ -1,0 +1,77 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to perform"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+
+    env:
+      TF_VAR_gmail_user: ${{ secrets.TF_VAR_GMAIL_USER }}
+      TF_VAR_gmail_password: ${{ secrets.TF_VAR_GMAIL_PASSWORD }}
+      TF_VAR_alert_email: ${{ secrets.TF_VAR_ALERT_EMAIL }}
+
+      TF_VAR_ami_id: ${{ secrets.TF_VAR_AMI_ID }}
+      TF_VAR_instance_type: ${{ secrets.TF_VAR_INSTANCE_TYPE }}
+      TF_VAR_key_name: ${{ secrets.TF_VAR_KEY_NAME }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve
+
+      - name: Show Deployment URLs
+        if: github.event.inputs.action == 'apply'
+        run: |
+          echo "=============================="
+          echo "Deployment Complete"
+          echo "=============================="
+
+          terraform output
+
+          echo ""
+          echo "Grafana:"
+          echo "http://$(terraform output -raw grafana_public_ip):3000"
+
+          echo ""
+          echo "Prometheus:"
+          echo "http://$(terraform output -raw prometheus_public_ip):9090"
+
+          echo ""
+          echo "Alertmanager:"
+          echo "http://$(terraform output -raw alertmanager_public_ip):9093"
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
