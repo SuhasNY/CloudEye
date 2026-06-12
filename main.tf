@@ -20,13 +20,13 @@ module "prometheus" {
   ]
 
   user_data = templatefile(
-  "${path.module}/userdata/prometheus.sh.tmpl",
-  {
+    "${path.module}/userdata/prometheus.sh.tmpl",
+    {
       node_exporter_ip = module.node_exporter.private_ip
       alertmanager_ip  = module.alertmanager.private_ip
       bucket_name      = "cloudeye-monitoring-suhasny"
-  }
- )
+    }
+  )
 }
 
 module "node_exporter" {
@@ -95,7 +95,7 @@ module "alertmanager" {
       gmail_user     = var.gmail_user
       gmail_password = var.gmail_password
       alert_email    = var.alert_email
-      bucket_name = "cloudeye-monitoring-suhasny"
+      bucket_name    = "cloudeye-monitoring-suhasny"
     }
   )
 }

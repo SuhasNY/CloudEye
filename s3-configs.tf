@@ -8,7 +8,7 @@ resource "aws_s3_object" "prometheus_config" {
     "${path.module}/configs/prometheus/prometheus.yml",
     {
       node_exporter_ip = module.node_exporter.private_ip
-      alertmanager_ip = module.alertmanager.private_ip
+      alertmanager_ip  = module.alertmanager.private_ip
     }
   )
 }
